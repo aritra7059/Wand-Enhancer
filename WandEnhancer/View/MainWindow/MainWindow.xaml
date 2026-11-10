@@ -11,6 +11,7 @@
         Height="510" MaxHeight="510"
         Width="780" MaxWidth="780" 
         Opacity="0.97"
+        AllowDrop="True" PreviewDragOver="OnDragOver" PreviewDrop="OnDrop"
         Background="Transparent"
         WindowStyle="None"
         FontFamily="{StaticResource Inter}"
@@ -44,7 +45,31 @@
                                Foreground="{DynamicResource Foreground}">
                         v 1.0.0
                     </TextBlock>
-                    
+
+                    <Button Margin="10 0 0 0" Padding="8 2"
+                            VerticalAlignment="Center" FontSize="10.5" FontWeight="SemiBold"
+                            Background="{DynamicResource Primary}"
+                            Foreground="{DynamicResource PrimaryForeground}"
+                            BorderThickness="0" Cursor="Hand"
+                            Content="{DynamicResource mw_update_badge}"
+                            Command="{Binding ShowUpdateCommand}"
+                            ToolTip="{DynamicResource up_popup_title}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <!-- Collapsed by default so offline builds never show the badge. -->
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Button.Resources>
+                            <CornerRadius x:Key="CornerRadius">4 4 4 4</CornerRadius>
+                        </Button.Resources>
+                    </Button>
+
                 </StackPanel>
                                 
                 <StackPanel  HorizontalAlignment="Right" Orientation="Horizontal">
@@ -89,11 +114,21 @@
                 </Grid.RowDefinitions>
                 
                 <Grid Margin="10" Cursor="Hand" Background="Transparent">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
                     <TextBox Style="{StaticResource TitledTextBox}"
                              IsReadOnly="True"
                              Text="{Binding WeModInfo.RootDirectory, Mode=OneWay}"
                              VerticalAlignment="Center">
                     </TextBox>
+                    <Button Grid.Column="1" Width="22" Height="22" Padding="4" Margin="6 0 0 0"
+                            Style="{StaticResource IconButton}"
+                            Tag="{StaticResource RefreshIcon}"
+                            ToolTip="{DynamicResource mw_redetect}"
+                            Command="{Binding RescanInstallCommand}"
+                            VerticalAlignment="Center" />
                     <Grid.InputBindings>
                         <MouseBinding Gesture="LeftClick" Command="{Binding SetFolderPathCommand}" />
                     </Grid.InputBindings>
@@ -151,6 +186,11 @@
                                         Margin="0 4 4 0">
                                 <Button Width="22" Height="22" Padding="4"
                                         Style="{StaticResource IconButton}"
+                                        Tag="{StaticResource InfoIcon}"
+                                        ToolTip="{DynamicResource mw_copy_diagnostics}"
+                                        Command="{Binding CopyDiagnosticsCommand}"/>
+                                <Button Width="22" Height="22" Padding="4" Margin="4 0 0 0"
+                                        Style="{StaticResource IconButton}"
                                         Tag="{StaticResource CopyIcon}"
                                         ToolTip="{DynamicResource mw_copy_logs}"
                                         Command="{Binding CopyLogsCommand}"/>
@@ -183,10 +223,11 @@
                                     Content="{DynamicResource mw_patch}"/>
                         </Grid>
                         <Button HorizontalAlignment="Right"
-                                Command="{Binding RestoreBackupCommand }"
-                                FontWeight="Bold" FontSize="16" Width="200" 
+                                Command="{Binding RestoreBackupCommand}"
+                                FontWeight="Bold" FontSize="16" Width="200"
                                 Style="{StaticResource ColoredButton}"
-                                Visibility="{Binding AlreadyPatched, Converter={StaticResource ToVisibilityConverter}}"
+                                IsEnabled="{Binding IsIdle}"
+                                Visibility="{Binding CanRestore, Converter={StaticResource ToVisibilityConverter}}"
                                 Content="{DynamicResource mw_restore}"/>
                     </Grid>
                 </StackPanel>
